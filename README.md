@@ -17,9 +17,18 @@ Stream Manager is a local-only dashboard for planning livestreams and shorts acr
 ## Getting started
 
 ```bash
-npm install  # installs the vendored TypeScript toolchain
-npm run build
-npm start
+./scripts/install.sh   # installs dependencies and runs the build
+npm start              # serve http://localhost:4000
+```
+
+Need a manual flow instead? Run `npm install`, `npm run build`, then `npm start`.
+
+### Removing local artifacts
+
+To clean up everything that was installed or generated locally (including `stream_manager.db`), run:
+
+```bash
+./scripts/uninstall.sh
 ```
 
 The server starts on [http://localhost:4000](http://localhost:4000). The static UI is served from the same origin and consumes the `/api/*` endpoints.
