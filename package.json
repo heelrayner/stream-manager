@@ -1,0 +1,20 @@
+{
+  "name": "stream-manager",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "build:server": "tsc -p tsconfig.server.json",
+    "build:client": "tsc -p tsconfig.client.json",
+    "build:electron": "tsc -p tsconfig.electron.json",
+    "build": "npm run build:server && npm run build:client && node scripts/copy-static.js && npm run build:electron",
+    "start:server": "node dist/server/index.js",
+    "start:electron": "npm run build && electron dist/electron/main.js",
+    "start": "npm run start:electron"
+  },
+  "devDependencies": {
+    "@types/node": "22.9.3",
+    "electron": "31.6.0"
+  }
+}

@@ -1,0 +1,6 @@
+node_modules
+/dist
+stream_manager.db
+/tmp
+npm-debug.log*
+.DS_Store
