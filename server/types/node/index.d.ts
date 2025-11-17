@@ -35,6 +35,12 @@ declare class BufferClass extends Uint8Array {
 declare type Buffer = BufferClass;
 declare const Buffer: typeof BufferClass;
 declare const console: { log: (...args: any[]) => void; error: (...args: any[]) => void; warn: (...args: any[]) => void };
+declare function setTimeout(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): any;
+declare function clearTimeout(handle: any): void;
+declare function setInterval(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): any;
+declare function clearInterval(handle: any): void;
+declare function setImmediate(handler: (...args: any[]) => void, ...args: any[]): any;
+declare function clearImmediate(handle: any): void;
 declare class URL {
   constructor(url: string, base?: string | URL);
   toString(): string;

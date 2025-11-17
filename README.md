@@ -26,7 +26,8 @@ powershell -ExecutionPolicy Bypass -File scripts/install.ps1
 npm start
 ```
 
-Need a manual flow instead? Run `npm install`, `npm run build`, then `npm start`.
+Need a manual flow instead? Run `npm install`, `npm run build`, then `npm start`. If you're behind a proxy or registry mirror,
+set `NPM_CONFIG_REGISTRY` before installing so dependencies resolve correctly.
 
 ### Removing local artifacts
 
@@ -75,3 +76,4 @@ All responses are JSON. Important routes include:
 
 - The custom mini-React implementation (`client/src/lib/tiny-react.ts`) powers hooks (`useState`, `useEffect`) and JSX rendering without external dependencies.
 - The backend uses the experimental `node:sqlite` driver. Node 22 prints an experimental warning the first time the database is opened.
+- If TypeScript complains about missing Node/Electron globals in offline environments, the stub declarations in `server/types/node/index.d.ts` and `electron/types` keep builds green without pulling from DefinitelyTyped.
