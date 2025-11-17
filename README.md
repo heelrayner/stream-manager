@@ -26,7 +26,7 @@ powershell -ExecutionPolicy Bypass -File scripts/install.ps1
 npm start
 ```
 
-Need a manual flow instead? Run `npm install`, `npm run build`, then `npm start`. If you're behind a proxy or registry mirror,
+Need a manual flow instead? Run `npm install`, `npm run build`, then `npm start`. The install step pulls in the local TypeScript compiler so `tsc` works on Windows without needing a global install. If you're behind a proxy or registry mirror,
 set `NPM_CONFIG_REGISTRY` before installing so dependencies resolve correctly.
 
 ### Removing local artifacts
