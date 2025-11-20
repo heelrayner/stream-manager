@@ -1,66 +1,109 @@
-# Stream Manager
+# streaman
 
-Stream Manager is a local-only dashboard for planning livestreams and shorts across TikTok, Twitch, Kick, YouTube, and Facebook. It stores API keys and stream plans in a local SQLite database and exposes a lightweight React-like UI for managing schedules, statuses, and per-platform metadata.
+streaman is a local-only Electron desktop application for managing livestreams, scheduled short-form uploads, VOD publishing, alerts, and go-live automations across TikTok, Twitch, Kick, YouTube, and Facebook. All automation and data live on your machine with a local SQLite database (`streaman.db`).
 
-## Tech stack
+## Features
+- Electron + React shell with IPC wiring for accounts, schedules, streams, VODs, alerts, and settings.
+- Multiple accounts per platform with encrypted access/refresh tokens and periodic refresh jobs.
+- Short-form scheduler for TikTok/Twitch/Kick/YouTube/Facebook with per-platform status tracking.
+- Stream metadata updater that broadcasts title, category, and game to selected accounts.
+- Alerts feed collected from platform events and pushed live to the renderer.
+- VOD upload queue for long-form videos.
+- Social automations for go-live messages via Twitter/X, Discord, or generic webhooks.
+- Highlight capture for timestamped moments.
 
-- **Backend:** Node.js 22, TypeScript, custom HTTP server with SQLite (via the built-in `node:sqlite` driver)
-- **Frontend:** React-style UI written in TypeScript and compiled with the TypeScript compiler (no external bundler required)
-- **Database:** SQLite (`stream_manager.db`) living alongside the project root
-
-## Prerequisites
-
-- Node.js 22+
-- npm 10+
-- Set an `ENCRYPTION_KEY` environment variable to encrypt API tokens (defaults to `stream-manager-development-key` for local usage)
+## Project structure
+```
+streaman/
+├── electron/
+│   ├── main.ts
+│   └── preload.ts
+├── backend/
+│   ├── src/
+│   │   ├── index.ts
+│   │   ├── services/
+│   │   │   ├── tiktokService.ts
+│   │   │   ├── twitchService.ts
+│   │   │   ├── kickService.ts
+│   │   │   ├── youtubeService.ts
+│   │   │   └── facebookService.ts
+│   │   ├── social/
+│   │   │   ├── twitterService.ts
+│   │   │   ├── discordService.ts
+│   │   │   └── genericWebhookService.ts
+│   │   ├── utils/
+│   │   │   ├── encryption.ts
+│   │   │   └── logger.ts
+│   └── db/prisma.schema
+├── renderer/
+│   ├── index.html
+│   ├── vite.config.ts
+│   └── src/
+│       ├── main.tsx
+│       ├── App.tsx
+│       ├── styles.css
+│       ├── api/
+│       └── pages/
+├── package.json
+└── tsconfig.json
+```
 
 ## Getting started
 
-```bash
-./scripts/install.sh   # installs dependencies and runs the build
-npm start              # serve http://localhost:4000
+### Installation
+```
+npm install
+```
+This installs dependencies and generates the Prisma client.
+
+### Development
+Run Electron (main + backend) alongside the React renderer:
+```
+npm run dev
+```
+- Renderer dev server: `npm run dev:renderer`
+- Electron main process: `npm run dev:main`
+
+### Build
+```
+npm run build        # build backend + renderer
+npm run build:renderer
+npm run build:backend
 ```
 
-Need a manual flow instead? Run `npm install`, `npm run build`, then `npm start`.
-
-### Removing local artifacts
-
-To clean up everything that was installed or generated locally (including `stream_manager.db`), run:
-
-```bash
-./scripts/uninstall.sh
+### Packaging
+Create distributable installers with electron-builder:
+```
+npm run dist
 ```
 
-The server starts on [http://localhost:4000](http://localhost:4000). The static UI is served from the same origin and consumes the `/api/*` endpoints.
+### Start packaged build locally
+After building, start the compiled Electron app:
+```
+npm run start
+```
 
-## Available scripts
+## Database
+The app uses SQLite through Prisma. The database file `streaman.db` is stored locally (under `backend/db/` by default). Models include accounts, scheduled shorts, VOD uploads, alerts, social integrations, and highlights.
 
-| Script | Description |
-| ------ | ----------- |
-| `npm run build:server` | Type-checks and compiles the server into `dist/server`. |
-| `npm run build:client` | Compiles the client-side TypeScript/JSX into `dist/public/assets`. |
-| `npm run build` | Runs both builds and copies the static assets into `dist/public`. |
-| `npm start` | Runs `node dist/server/index.js`. Build first if you have local changes. |
+## Platform linking
+Use the Accounts page to connect TikTok, Twitch, Kick, YouTube, and Facebook accounts. Provide account ID, display name, access token, refresh token, and scopes. Tokens are encrypted before being written to the database. You can disconnect accounts at any time.
 
-## API overview
+## Scheduling shorts and VODs
+- **Shorts**: Create scheduled posts with title, description, tags, video path, scheduled time, and target platform/account.
+- **VODs**: Queue long-form uploads with title, description, tags, video path, scheduled time, and platform/account.
+Background jobs periodically publish pending items and update status to `pending`, `uploading`, `posted`, or `failed`.
 
-All responses are JSON. Important routes include:
+## Stream metadata updates
+From the Dashboard, select multiple platform accounts and push a shared title/category/game via the `streams:updateMetadata` IPC route.
 
-- `GET /api/health` – simple readiness probe.
-- `GET /api/platforms` – list saved platform credentials (tokens are never returned, only previews).
-- `POST /api/platforms` – add a platform credential (`platform`, `username`, `apiKey`, optional `notes`).
-- `DELETE /api/platforms/:id` – remove a credential.
-- `GET /api/streams` – list planned livestreams/shorts.
-- `POST /api/streams` – create a schedule item (`title`, `platform`, `contentType`, `status`, optional `scheduledAt`, `notes`, `accountId`).
-- `PATCH /api/streams/:id/status` – quick status changes.
-- `GET /api/dashboard` – aggregate counts used for the stat cards.
+## Alerts feed
+Backend normalizes alert events (follows, subs, donations, raids, gifts) and stores them in SQLite. New alerts are pushed to the renderer over IPC and rendered in a live feed.
 
-## Security notes
+## Automations and social posting
+Create social integrations for Twitter/X, Discord, or generic webhooks. Enable go-live message templates that trigger when new posts are published. Settings allow add/edit/delete/toggle of each integration.
 
-- All API tokens are AES-256 encrypted at rest using the `ENCRYPTION_KEY` env var. Only previews (masked values) are exposed to the client.
-- Everything runs locally; no third-party services or SaaS endpoints are required.
-
-## Development tips
-
-- The custom mini-React implementation (`client/src/lib/tiny-react.ts`) powers hooks (`useState`, `useEffect`) and JSX rendering without external dependencies.
-- The backend uses the experimental `node:sqlite` driver. Node 22 prints an experimental warning the first time the database is opened.
+## Known limitations
+- Platform SDK calls are stubbed for local-only behavior; replace service methods with real platform API calls as needed.
+- Token refresh and upload schedulers run on cron intervals within the Electron main process; ensure the app is open for tasks to execute.
+- No overlays, chatbot, moderation, or loyalty systems are included by design.
