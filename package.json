@@ -1,12 +1,46 @@
 {
-  "name": "stream-manager",
-  "version": "1.0.0",
+  "name": "streaman",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "dist/electron/main.js",
   "scripts": {
-    "build:server": "tsc -p tsconfig.server.json",
-    "build:client": "tsc -p tsconfig.client.json",
-    "build": "npm run build:server && npm run build:client && node scripts/copy-static.js",
-    "start": "node dist/server/index.js"
+    "postinstall": "npm run prisma:generate",
+    "prisma:generate": "prisma generate --schema=backend/db/prisma.schema",
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:main\"",
+    "dev:main": "cross-env NODE_ENV=development electron -r ts-node/register ./electron/main.ts",
+    "dev:renderer": "cd renderer && vite",
+    "build:renderer": "cd renderer && vite build",
+    "build:backend": "tsc -p backend/tsconfig.json",
+    "build:main": "tsc -p electron/tsconfig.json",
+    "build": "npm run build:backend && npm run build:renderer && npm run build:main",
+    "start": "npm run build && cross-env NODE_ENV=production electron dist/electron/main.js",
+    "dist": "electron-builder --config electron-builder.yml"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.17.0",
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^29.3.0",
+    "electron-log": "^5.1.2",
+    "node-cron": "^3.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.22.3",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "electron-builder": "^24.13.3",
+    "prisma": "^5.17.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  },
+  "prisma": {
+    "schema": "backend/db/prisma.schema"
   }
 }

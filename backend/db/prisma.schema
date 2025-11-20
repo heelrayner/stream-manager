@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id               Int       @id @default(autoincrement())
+  platform         String
+  externalId       String   @unique
+  displayName      String
+  accessToken      String
+  refreshToken     String
+  scopes           String
+  connectionStatus String    @default("disconnected")
+  lastRefreshed    DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  scheduledShorts  ScheduledShort[]
+  vods             Vod[]
+}
+
+model ScheduledShort {
+  id             Int       @id @default(autoincrement())
+  title          String
+  description    String
+  tags           String
+  videoPath      String
+  scheduledTime  DateTime
+  platform       String
+  status         String    @default("pending")
+  resultMessage  String?
+  account        Account?  @relation(fields: [accountId], references: [id])
+  accountId      Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Vod {
+  id             Int       @id @default(autoincrement())
+  title          String
+  description    String
+  tags           String
+  videoPath      String
+  scheduledTime  DateTime
+  platform       String
+  status         String    @default("pending")
+  account        Account?  @relation(fields: [accountId], references: [id])
+  accountId      Int?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model StreamMetadataUpdate {
+  id            Int      @id @default(autoincrement())
+  title         String
+  category      String
+  game          String
+  scheduledTime DateTime
+  accountIds    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model AlertEvent {
+  id        Int      @id @default(autoincrement())
+  platform  String
+  type      String
+  message   String
+  payload   Json
+  createdAt DateTime @default(now())
+}
+
+model SocialIntegration {
+  id             Int      @id @default(autoincrement())
+  name           String
+  type           String
+  apiKey         String?
+  webhookUrl     String?
+  enabled        Boolean  @default(true)
+  config         Json?
+  messageTemplate String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Highlight {
+  id        Int      @id @default(autoincrement())
+  label     String
+  timestamp Int
+  note      String?
+  createdAt DateTime @default(now())
+}
