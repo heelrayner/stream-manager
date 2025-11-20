@@ -54,6 +54,7 @@ streaman/
    ```bash
    npm install
    ```
+   - On Windows, run the command in PowerShell. Ensure Node.js, Python, and the Visual Studio Build Tools (for the `sqlite3` native module) are available on your PATH.
 
 2. **Development**
    Run the Electron shell and renderer dev server together:
@@ -79,6 +80,12 @@ streaman/
    ```bash
    npm start
    ```
+   - `npm start` rebuilds the backend, renderer, and main process before launching `dist/electron/main.js`, which keeps the packaged entrypoint consistent on Windows, macOS, and Linux.
+
+## Windows notes
+- Scripts use `cross-env` and `concurrently`, so they work the same in PowerShell, CMD, or Git Bash.
+- Electron stores the SQLite database at `%APPDATA%/streaman/streaman.db` by default (Electron `userData` path), keeping data in the user profile without elevated permissions.
+- If native dependencies fail to build, install the latest [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio) and restart your shell before re-running `npm install`.
 
 ## Key Features
 - **Account linking** for TikTok, Twitch, Kick, YouTube, and Facebook with encrypted token storage, multiple accounts per platform, and IPC endpoints (`accounts:get`, `accounts:connect`, `accounts:disconnect`).

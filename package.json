@@ -3,18 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "electron/main.ts",
+  "main": "dist/electron/main.js",
   "scripts": {
     "postinstall": "npm run prisma:generate",
     "prisma:generate": "prisma generate --schema=backend/db/prisma.schema",
     "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:main\"",
-    "dev:main": "cross-env NODE_ENV=development electron .",
+    "dev:main": "cross-env NODE_ENV=development electron -r ts-node/register ./electron/main.ts",
     "dev:renderer": "cd renderer && vite",
     "build:renderer": "cd renderer && vite build",
     "build:backend": "tsc -p backend/tsconfig.json",
     "build:main": "tsc -p electron/tsconfig.json",
     "build": "npm run build:backend && npm run build:renderer && npm run build:main",
-    "start": "cross-env NODE_ENV=production electron .",
+    "start": "npm run build && cross-env NODE_ENV=production electron dist/electron/main.js",
     "dist": "electron-builder --config electron-builder.yml"
   },
   "dependencies": {

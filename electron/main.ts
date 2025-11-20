@@ -1,23 +1,31 @@
 import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { createBackend, ConnectAccountPayload, ScheduleShortPayload, VodPayload, MetadataPayload } from '../backend/src/index';
 import { logger } from '../backend/utils/logger';
 
 let mainWindow: BrowserWindow | null = null;
 const backend = createBackend();
+const isDev = process.env.NODE_ENV !== 'production';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function createWindow() {
+  const preloadPath = isDev
+    ? path.join(__dirname, 'preload.ts')
+    : path.join(__dirname, 'preload.js');
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: preloadPath,
       nodeIntegration: false,
       contextIsolation: true
     }
   });
 
-  const rendererUrl = process.env.NODE_ENV === 'development'
+  const rendererUrl = isDev
     ? 'http://localhost:5173'
     : `file://${path.join(__dirname, '../renderer/index.html')}`;
 
