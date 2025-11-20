@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./streaman.db"
+}
+
+enum Platform {
+  TIKTOK
+  TWITCH
+  KICK
+  YOUTUBE
+  FACEBOOK
+}
+
+enum ScheduleStatus {
+  PENDING
+  UPLOADING
+  POSTED
+  FAILED
+}
+
+enum VodStatus {
+  PENDING
+  UPLOADING
+  POSTED
+  FAILED
+}
+
+model Account {
+  id            Int       @id @default(autoincrement())
+  platform      Platform
+  accountId     String
+  displayName   String
+  accessToken   String
+  refreshToken  String
+  scopes        String[]
+  lastRefreshAt DateTime?
+  connected     Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  schedules     ShortVideoSchedule[]
+  vods          VodUpload[]
+  alerts        AlertEvent[]
+}
+
+model ShortVideoSchedule {
+  id           Int            @id @default(autoincrement())
+  title        String
+  description  String
+  tags         String[]
+  videoPath    String
+  scheduledFor DateTime
+  status       ScheduleStatus @default(PENDING)
+  platform     Platform
+  account      Account?       @relation(fields: [accountId], references: [id])
+  accountId    Int?
+  resultMessage String?
+  externalId   String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model VodUpload {
+  id           Int       @id @default(autoincrement())
+  title        String
+  description  String
+  tags         String[]
+  videoPath    String
+  scheduledFor DateTime
+  status       VodStatus @default(PENDING)
+  platform     Platform
+  account      Account?  @relation(fields: [accountId], references: [id])
+  accountId    Int?
+  externalId   String?
+  resultMessage String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model AlertEvent {
+  id        Int       @id @default(autoincrement())
+  platform  Platform
+  account   Account?  @relation(fields: [accountId], references: [id])
+  accountId Int?
+  type      String
+  payload   Json
+  createdAt DateTime  @default(now())
+}
+
+model SocialIntegration {
+  id              Int      @id @default(autoincrement())
+  name            String
+  type            String
+  apiKey          String?
+  webhookUrl      String?
+  enabled         Boolean  @default(true)
+  config          Json?
+  messageTemplate String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Highlight {
+  id        Int      @id @default(autoincrement())
+  label     String
+  timestamp Int
+  note      String?
+  createdAt DateTime @default(now())
+}

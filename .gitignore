@@ -1,6 +1,11 @@
 node_modules
 /dist
-stream_manager.db
+/renderer/dist
+/renderer/node_modules
+release
+streaman.db
 /tmp
 npm-debug.log*
 .DS_Store
+.idea
+.vscode
